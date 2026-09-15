@@ -1,0 +1,4 @@
+.vercel
+.opencode
+node_modules
+*.log

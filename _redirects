@@ -1,0 +1,11 @@
+# Redirecionamentos ARCA (compat com hospedagens estáticas)
+/sistema-golfleet-telemetria/*  /telemetria/  301
+/sistema-golfleet-videotelemetria/*  /video-telemetria/  301
+/golfleet-flex/*  /gestao-de-frotas/  301
+/golfleet-smart/*  /gestao-de-frotas/  301
+/gestao-frotas-publicas/*  /gestao-de-frotas/  301
+/tco/*  /gestao-de-frotas/  301
+/velocidade-por-via/*  /telemetria/  301
+/locadoras/*  /segmentos/  301
+/integracoes/*  /gestao-de-frotas/  301
+/materiais-ricos/*  /blog/  301

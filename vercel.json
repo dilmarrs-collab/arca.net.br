@@ -1,0 +1,22 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true,
+  "trailingSlash": true,
+  "redirects": [
+    { "source": "/sistema-golfleet-telemetria", "destination": "/telemetria/", "permanent": true },
+    { "source": "/sistema-golfleet-telemetria/:path*", "destination": "/telemetria/", "permanent": true },
+    { "source": "/sistema-golfleet-videotelemetria", "destination": "/video-telemetria/", "permanent": true },
+    { "source": "/sistema-golfleet-videotelemetria/:path*", "destination": "/video-telemetria/", "permanent": true },
+    { "source": "/golfleet-flex", "destination": "/gestao-de-frotas/", "permanent": true },
+    { "source": "/golfleet-flex/:path*", "destination": "/gestao-de-frotas/", "permanent": true },
+    { "source": "/golfleet-smart", "destination": "/gestao-de-frotas/", "permanent": true },
+    { "source": "/golfleet-smart/:path*", "destination": "/gestao-de-frotas/", "permanent": true },
+    { "source": "/gestao-frotas-publicas", "destination": "/gestao-de-frotas/", "permanent": true },
+    { "source": "/tco", "destination": "/gestao-de-frotas/", "permanent": true },
+    { "source": "/velocidade-por-via", "destination": "/telemetria/", "permanent": true },
+    { "source": "/locadoras", "destination": "/segmentos/", "permanent": true },
+    { "source": "/integracoes", "destination": "/gestao-de-frotas/", "permanent": true },
+    { "source": "/materiais-ricos", "destination": "/", "permanent": true },
+    { "source": "/materiais-ricos/:path*", "destination": "/", "permanent": true }
+  ]
+}
