@@ -2,8 +2,8 @@
  * Configuracao publica do Portal ARCA.
  * Nunca use a service_role key no navegador. Informe somente a chave anon/publishable.
  */
-export const SUPABASE_URL = 'https://SEU-PROJETO.supabase.co';
-export const SUPABASE_ANON_KEY = 'SUA-CHAVE-PUBLICAVEL-OU-ANON';
+export const SUPABASE_URL = 'https://xdusaipzgzzmvpupblzz.supabase.co';
+export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhkdXNhaXB6Z3p6bXZwdXBibHp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwMjgyMTEsImV4cCI6MjEwMzYwNDIxMX0.sE8bMoJArywj0ns9lmfuv_JcVL53INajk-CED2BdFBM';
 
 export const PORTAL_CONFIG = Object.freeze({
   supabaseUrl: SUPABASE_URL,
