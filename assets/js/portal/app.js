@@ -1,5 +1,5 @@
-import { isConfigured } from './config.js';
-import { authApi, portalApi, supabase } from './api.js';
+import { isConfigured } from './config.js?v=20260917-2115';
+import { authApi, portalApi, supabase } from './api.js?v=20260917-2115';
 import { icon } from './icons.js';
 import {
   adminView, announcementsView, authView, dashboardView, errorView, libraryView,

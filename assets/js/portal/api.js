@@ -1,5 +1,5 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/+esm';
-import { isConfigured, PORTAL_CONFIG } from './config.js';
+import { isConfigured, PORTAL_CONFIG } from './config.js?v=20260917-2115';
 import { safeFileName, uuid } from './utils.js';
 
 // Keep placeholder deployments renderable so the setup notice can be shown.
