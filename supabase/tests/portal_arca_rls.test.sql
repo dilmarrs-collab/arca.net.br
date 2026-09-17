@@ -18,9 +18,9 @@ where id = '10000000-0000-4000-8000-000000000001';
 update public.profiles set role_id = (select id from public.roles where code = 'COMERCIAL')
 where id = '10000000-0000-4000-8000-000000000004';
 
-insert into public.content_items (id, owner_id, kind, scope, visibility, title, external_url) values
-  ('20000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000002', 'LINK', 'PERSONAL', 'PRIVATE', 'Private', 'https://example.com/private'),
-  ('20000000-0000-4000-8000-000000000002', '10000000-0000-4000-8000-000000000002', 'LINK', 'LIBRARY', 'ROLE', 'Role', 'https://example.com/role'),
+insert into public.content_items (id, owner_id, kind, scope, visibility, title, external_url, storage_path) values
+  ('20000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000002', 'LINK', 'PERSONAL', 'PRIVATE', 'Private', 'https://example.com/private', null),
+  ('20000000-0000-4000-8000-000000000002', '10000000-0000-4000-8000-000000000002', 'LINK', 'LIBRARY', 'ROLE', 'Role', 'https://example.com/role', null),
   ('20000000-0000-4000-8000-000000000003', '10000000-0000-4000-8000-000000000002', 'FILE', 'LIBRARY', 'USERS', 'User', null, '10000000-0000-4000-8000-000000000002/user.pdf');
 
 insert into public.content_role_grants (content_item_id, role_id)
@@ -46,7 +46,16 @@ reset role;
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000002', true);
 select is((select count(*)::integer from public.content_items), 3, 'owner can read all own content');
-select is((select count(*)::integer from public.sharing_directory()), 4, 'normal active user can list active sharing targets');
+select is((
+  select count(*)::integer
+  from public.sharing_directory()
+  where id in (
+    '10000000-0000-4000-8000-000000000001',
+    '10000000-0000-4000-8000-000000000002',
+    '10000000-0000-4000-8000-000000000003',
+    '10000000-0000-4000-8000-000000000004'
+  )
+), 4, 'normal active user can list active sharing targets');
 select lives_ok(
   $$update public.profiles set full_name = 'Owner Updated' where id = '10000000-0000-4000-8000-000000000002'$$,
   'normal user can update safe own-profile fields'
