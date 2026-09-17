@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1530">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Portal ARCA</title>
+  <meta name="description" content="Portal interno da ARCA Tecnologia.">
+  <link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/portal.css">
+</head>
+<body class="portal">
+  <a class="portal-skip" href="#portal-main">Ir para o conteudo</a>
+
+  <div id="portal-root" aria-live="polite">
+    <div class="portal-boot" role="status">
+      <span class="portal-spinner" aria-hidden="true"></span>
+      <span>Carregando Portal ARCA...</span>
+    </div>
+  </div>
+
+  <div id="portal-toasts" class="portal-toasts" aria-live="polite" aria-atomic="true"></div>
+  <dialog id="portal-dialog" class="portal-dialog" aria-labelledby="dialog-title">
+    <div id="portal-dialog-content"></div>
+  </dialog>
+
+  <noscript>
+    <div class="portal-noscript">Ative o JavaScript para acessar o Portal ARCA.</div>
+  </noscript>
+  <script type="module" src="../assets/js/portal/app.js"></script>
+</body>
+</html>

@@ -231,6 +231,8 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 .client-link svg { width: 15px; height: 15px; }
 .client-link:hover { color: var(--arca-navy-deep); background: rgba(16,26,44,0.06); }
+.client-link--portal { color: var(--arca-navy); }
+.client-link--portal:hover { color: var(--arca-blue); background: rgba(13,91,255,0.06); }
 
 .menu-toggle {
   display: none;

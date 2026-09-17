@@ -104,6 +104,9 @@ function header(pref, current) {
       </ul>
     </nav>
     <div class="header-actions">
+      <a href="${pref}portal/" class="client-link client-link--portal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> Portal ARCA
+      </a>
       <a href="https://arca.seeflex.com.br/" class="client-link" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Área do Cliente
       </a>
@@ -128,7 +131,10 @@ function header(pref, current) {
       <li><a href="${pref}index.html#porque-arca">Por que ARCA</a></li>
       <li><a href="${pref}contato/">Contato</a></li>
       <li class="mnav-ctas"><a class="btn btn-primary" href="${pref}contato/">Falar com um especialista</a></li>
-      <li class="mnav-extra"><a href="https://arca.seeflex.com.br/" target="_blank" rel="noopener">Área do Cliente</a></li>
+      <li class="mnav-extra">
+        <a href="${pref}portal/">Portal ARCA</a>
+        <a href="https://arca.seeflex.com.br/" target="_blank" rel="noopener">Área do Cliente</a>
+      </li>
     </ul>
   </nav>
 </header>`;
@@ -224,6 +230,7 @@ function footer(pref) {
           <li><a href="${pref}index.html#porque-arca">Sobre a ARCA</a></li>
           <li><a href="${pref}contato/">Contato</a></li>
           <li><a href="${pref}contato/">Suporte</a></li>
+          <li><a href="${pref}portal/">Portal ARCA</a></li>
           <li><a href="https://arca.seeflex.com.br/" target="_blank" rel="noopener">Área do Cliente</a></li>
         </ul>
       </div>
