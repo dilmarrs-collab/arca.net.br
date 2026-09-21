@@ -99,16 +99,22 @@ function pageHead(kicker, title, description, action = '') {
 
 function shortcutCard(item) {
   const url = isSafeWebUrl(item.url) ? item.url : '#';
-  return `<a class="portal-shortcut" href="${e(url)}" ${item.open_new_tab ? 'target="_blank" rel="noopener noreferrer"' : ''}>
+  const hasCredentials = item.username || item.password;
+  return `<a class="portal-shortcut ${hasCredentials ? 'portal-shortcut-credentials' : ''}" href="${e(url)}" ${item.open_new_tab ? 'target="_blank" rel="noopener noreferrer"' : ''}>
     <span class="portal-shortcut-icon">${icon(item.icon || 'grid')}</span><span><strong>${e(item.title)}</strong><small>${e(item.description || item.category?.name || 'Acessar sistema')}</small></span>${icon(item.open_new_tab ? 'external' : 'chevron')}
+    ${hasCredentials ? `<div class="portal-shortcut-creds" onclick="event.preventDefault(); event.stopPropagation();">
+      <button type="button" class="portal-cred-btn" data-action="copy-cred" data-type="username" data-value="${e(item.username || '')}" title="Copiar usuario">${icon('user')} Usuario</button>
+      <button type="button" class="portal-cred-btn" data-action="copy-cred" data-type="password" data-value="${e(item.password || '')}" title="Copiar senha">${icon('lock')} Senha</button>
+    </div>` : ''}
   </a>`;
 }
 
 function contentCard(item, actions = false) {
+  const isOffice = item.mime_type && (item.mime_type.includes('word') || item.mime_type.includes('presentation') || item.mime_type.includes('spreadsheet') || item.mime_type.includes('msword') || item.mime_type.includes('powerpoint') || item.mime_type.includes('excel'));
   return `<article class="portal-content-card" data-search-text="${e(`${item.title} ${item.description || ''} ${item.category?.name || ''}`.toLowerCase())}" data-category="${e(item.category_id || '')}">
     <div class="portal-file-icon portal-file-${e((item.kind || 'FILE').toLowerCase())}">${icon(['LINK', 'VIDEO'].includes(item.kind) ? 'link' : 'file')}</div>
     <div class="portal-card-body"><div class="portal-card-topline"><span class="portal-badge">${e(item.category?.name || kindLabel(item.kind))}</span>${item.visibility ? `<span class="portal-muted-label">${e(visibilityLabel(item.visibility))}</span>` : ''}</div><h3>${e(item.title)}</h3><p>${e(item.description || 'Sem descricao.')}</p><small>${formatDate(item.published_at || item.created_at)}${item.file_size ? ` &middot; ${formatBytes(item.file_size)}` : ''}</small></div>
-    <div class="portal-card-actions"><button class="portal-btn portal-btn-small portal-btn-outline" data-action="open-content" data-id="${e(item.id)}">${['LINK', 'VIDEO'].includes(item.kind) ? 'Abrir' : 'Baixar'}</button>${actions ? `<button class="portal-icon-btn" data-action="edit-content" data-id="${e(item.id)}" aria-label="Editar ${e(item.title)}">${icon('edit')}</button><button class="portal-icon-btn portal-danger" data-action="delete-content" data-id="${e(item.id)}" aria-label="Excluir ${e(item.title)}">${icon('trash')}</button>` : ''}</div>
+    <div class="portal-card-actions"><button class="portal-btn portal-btn-small portal-btn-outline" data-action="open-content" data-id="${e(item.id)}" ${isOffice ? 'data-office="true"' : ''}>${['LINK', 'VIDEO'].includes(item.kind) ? 'Abrir' : (isOffice ? 'Visualizar' : 'Baixar')}</button>${actions ? `<button class="portal-icon-btn" data-action="edit-content" data-id="${e(item.id)}" aria-label="Editar ${e(item.title)}">${icon('edit')}</button><button class="portal-icon-btn portal-danger" data-action="delete-content" data-id="${e(item.id)}" aria-label="Excluir ${e(item.title)}">${icon('trash')}</button>` : ''}</div>
   </article>`;
 }
 
@@ -128,10 +134,11 @@ function trainingCard(item) {
 export function dashboardView(profile, data) {
   return `${pageHead('Visao geral', `Bom dia, ${firstName(profile)}.`, 'Tudo o que voce precisa para comecar o dia.')}
     <section class="portal-hero-card"><div><span class="portal-eyebrow portal-eyebrow-light">Portal ARCA</span><h2>Conectando pessoas, conhecimento e resultados.</h2><p>Acesse rapidamente os sistemas e acompanhe as novidades do time.</p></div><div class="portal-hero-mark">A</div></section>
-    <section class="portal-section"><div class="portal-section-head"><div><h2>Acesso rapido</h2><p>Sistemas liberados para o seu perfil</p></div><a href="#/sistemas">Ver todos ${icon('chevron')}</a></div>${data.shortcuts.length ? `<div class="portal-shortcut-grid">${data.shortcuts.slice(0, 6).map(shortcutCard).join('')}</div>` : emptyView('Nenhum sistema disponivel', 'Os acessos autorizados aparecerao aqui.')}</section>
-    <div class="portal-dashboard-grid"><section class="portal-section"><div class="portal-section-head"><div><h2>Comunicados recentes</h2></div><a href="#/comunicados">Ver todos</a></div>${data.announcements.length ? data.announcements.slice(0, 3).map((item) => announcementCard(item, true)).join('') : emptyView('Sem comunicados', 'Novidades da ARCA aparecerao aqui.')}</section>
-    <section class="portal-section"><div class="portal-section-head"><div><h2>Conteudos recentes</h2></div><a href="#/biblioteca">Abrir biblioteca</a></div><div class="portal-mini-list">${data.content.length ? data.content.slice(0, 4).map((item) => `<button data-action="open-content" data-id="${e(item.id)}"><span class="portal-file-icon">${icon(['LINK', 'VIDEO'].includes(item.kind) ? 'link' : 'file')}</span><span><strong>${e(item.title)}</strong><small>${e(item.category?.name || kindLabel(item.kind))} &middot; ${formatDate(item.published_at || item.created_at)}</small></span>${icon('chevron')}</button>`).join('') : emptyView('Biblioteca vazia', 'Conteudos compartilhados aparecerao aqui.')}</div></section></div>
-    ${data.trainings.length ? `<section class="portal-section"><div class="portal-section-head"><div><h2>Treinamentos em destaque</h2></div><a href="#/treinamentos">Ver agenda</a></div><div class="portal-training-grid">${data.trainings.slice(0, 3).map(trainingCard).join('')}</div></section>` : ''}`;
+    <div class="portal-toolbar"><label class="portal-search">${icon('search')}<span class="sr-only">Buscar</span><input type="search" data-filter="dashboard" placeholder="Buscar sistemas, conteudos e comunicados..."></label></div>
+    <section class="portal-section" data-dashboard-shortcuts><div class="portal-section-head"><div><h2>Acesso rapido</h2><p>Sistemas liberados para o seu perfil</p></div><a href="#/sistemas">Ver todos ${icon('chevron')}</a></div>${data.shortcuts.length ? `<div class="portal-shortcut-grid">${data.shortcuts.slice(0, 6).map(shortcutCard).join('')}</div>` : emptyView('Nenhum sistema disponivel', 'Os acessos autorizados aparecerao aqui.')}</section>
+    <div class="portal-dashboard-grid"><section class="portal-section" data-dashboard-announcements><div class="portal-section-head"><div><h2>Comunicados recentes</h2></div><a href="#/comunicados">Ver todos</a></div>${data.announcements.length ? data.announcements.slice(0, 3).map((item) => announcementCard(item, true)).join('') : emptyView('Sem comunicados', 'Novidades da ARCA aparecerao aqui.')}</section>
+    <section class="portal-section" data-dashboard-content><div class="portal-section-head"><div><h2>Conteudos recentes</h2></div><a href="#/biblioteca">Abrir biblioteca</a></div><div class="portal-mini-list">${data.content.length ? data.content.slice(0, 4).map((item) => `<button data-action="open-content" data-id="${e(item.id)}"><span class="portal-file-icon">${icon(['LINK', 'VIDEO'].includes(item.kind) ? 'link' : 'file')}</span><span><strong>${e(item.title)}</strong><small>${e(item.category?.name || kindLabel(item.kind))} &middot; ${formatDate(item.published_at || item.created_at)}</small></span>${icon('chevron')}</button>`).join('') : emptyView('Biblioteca vazia', 'Conteudos compartilhados aparecerao aqui.')}</div></section></div>
+    ${data.trainings.length ? `<section class="portal-section" data-dashboard-trainings><div class="portal-section-head"><div><h2>Treinamentos em destaque</h2></div><a href="#/treinamentos">Ver agenda</a></div><div class="portal-training-grid">${data.trainings.slice(0, 3).map(trainingCard).join('')}</div></section>` : ''}`;
 }
 
 export function systemsView(items) {
@@ -189,7 +196,8 @@ export function adminView(data, activeTab = 'usuarios') {
   const singular = { usuarios: 'usuario', atalhos: 'atalho', categorias: 'categoria', comunicados: 'comunicado', treinamentos: 'treinamento', conteudos: 'conteudo' }[activeTab];
   return `${pageHead('Acesso restrito', 'Administracao', 'Gerencie pessoas e conteudos do Portal ARCA.', `<button class="portal-btn portal-btn-primary" data-action="new-admin" data-type="${activeTab}">${icon('plus')} Novo ${singular}</button>`)}
     <div class="portal-admin-tabs" role="tablist" aria-label="Areas administrativas">${tabs.map(([key, label]) => `<button role="tab" aria-selected="${key === activeTab}" class="${key === activeTab ? 'active' : ''}" data-admin-tab="${key}">${label}</button>`).join('')}</div>
-    <section class="portal-admin-list" aria-live="polite">${maps[activeTab]?.length ? maps[activeTab].join('') : emptyView(`Nenhum ${singular}`, 'Crie o primeiro registro desta area.')}</section>`;
+    <div class="portal-toolbar"><label class="portal-search">${icon('search')}<span class="sr-only">Buscar</span><input type="search" data-filter="admin" placeholder="Buscar na area administrativa..."></label></div>
+    <section class="portal-admin-list" aria-live="polite" data-filter-list>${maps[activeTab]?.length ? maps[activeTab].join('') : emptyView(`Nenhum ${singular}`, 'Crie o primeiro registro desta area.')}</section>`;
 }
 
 export function visibilityLabel(value) {

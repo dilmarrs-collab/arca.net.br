@@ -324,6 +324,12 @@
 .portal-empty strong { color: var(--p-graphite); }
 .portal-empty p { max-width: 360px; margin: 5px 0 15px; font-size: .78rem; }
 .portal-no-results { padding: 30px; color: var(--p-muted); text-align: center; }
+.portal-shortcut-credentials { position: relative; }
+.portal-shortcut-creds { display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 10; padding: 8px; background: #fff; border: 1px solid var(--p-line); border-radius: 8px; box-shadow: var(--p-shadow-md); }
+.portal-shortcut-credentials:hover .portal-shortcut-creds { display: flex; gap: 6px; }
+.portal-cred-btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 10px; border: 1px solid var(--p-line); border-radius: 6px; background: #fff; color: var(--p-ink); font-size: .72rem; font-weight: 600; cursor: pointer; transition: all .15s; }
+.portal-cred-btn:hover { border-color: var(--p-blue); color: var(--p-blue); background: #f5f8ff; }
+.portal-cred-btn .portal-icon { width: 14px; height: 14px; }
 
 /* Profile and forms */
 .portal-profile-layout { display: grid; grid-template-columns: 280px minmax(0, 680px); gap: 22px; align-items: start; }

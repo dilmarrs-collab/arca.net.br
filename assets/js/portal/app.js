@@ -1,5 +1,5 @@
-import { isConfigured } from './config.js?v=20260917-2115';
-import { authApi, portalApi, supabase } from './api.js?v=20260917-2115';
+import { isConfigured } from './config.js?v=20260921-1030';
+import { authApi, portalApi, supabase } from './api.js?v=20260921-1030';
 import { icon } from './icons.js';
 import {
   adminView, announcementsView, authView, dashboardView, errorView, libraryView,
@@ -175,6 +175,30 @@ function bindViewEnhancements() {
     contentSearch.addEventListener('input', filter);
     category.addEventListener('change', filter);
   }
+
+  const dashboardSearch = qs('[data-filter="dashboard"]');
+  if (dashboardSearch) {
+    dashboardSearch.addEventListener('input', debounce(() => {
+      const query = dashboardSearch.value.trim().toLowerCase();
+      const sections = qsa('[data-dashboard-shortcuts], [data-dashboard-announcements], [data-dashboard-content], [data-dashboard-trainings]');
+      sections.forEach((section) => {
+        const cards = qsa('.portal-shortcut, .portal-announcement, .portal-mini-list button, .portal-training', section);
+        const visibleCards = Array.from(cards).filter((card) => card.textContent.toLowerCase().includes(query));
+        cards.forEach((card) => card.classList.toggle('hidden', !card.textContent.toLowerCase().includes(query)));
+        section.classList.toggle('hidden', visibleCards.length === 0 && query.length > 0);
+      });
+    }, 120));
+  }
+
+  const adminSearch = qs('[data-filter="admin"]');
+  if (adminSearch) {
+    adminSearch.addEventListener('input', debounce(() => {
+      const query = adminSearch.value.trim().toLowerCase();
+      const items = qsa('.portal-admin-item', qs('[data-filter-list]'));
+      items.forEach((item) => item.classList.toggle('hidden', !item.textContent.toLowerCase().includes(query)));
+      qs('.portal-no-results')?.classList.toggle('hidden', items.some((item) => !item.classList.contains('hidden')));
+    }, 120));
+  }
 }
 
 function openDialog(markup) {
@@ -340,7 +364,7 @@ async function openAdminDialog(type, item = null) {
     let visibility = item?.visibility || 'ALL';
     if (config.table === 'shortcuts') {
       visibility = item?.visible_to_all ? 'ALL' : grants.roleIds.length ? 'ROLE' : 'USERS';
-      fields = `<div class="portal-form-grid"><label>Titulo<input name="title" value="${e(item?.title || '')}" required></label><label>Icone<select name="icon"><option value="grid">Grade</option><option value="link" ${item?.icon === 'link' ? 'selected' : ''}>Link</option><option value="book" ${item?.icon === 'book' ? 'selected' : ''}>Livro</option><option value="users" ${item?.icon === 'users' ? 'selected' : ''}>Pessoas</option></select></label><label class="portal-span-2">Descricao<input name="description" value="${e(item?.description || '')}"></label><label class="portal-span-2">URL<input name="url" type="url" value="${e(item?.url || '')}" placeholder="https://" required></label><label>Audiencia<select name="visibility" data-visibility><option value="ALL" ${visibility === 'ALL' ? 'selected' : ''}>Todos</option><option value="ROLE" ${visibility === 'ROLE' ? 'selected' : ''}>Por funcao</option><option value="USERS" ${visibility === 'USERS' ? 'selected' : ''}>Por pessoas</option></select></label><label>Ordem<input name="sort_order" type="number" min="0" value="${e(item?.sort_order ?? 0)}"></label></div><div class="portal-toggle-row"><label class="portal-toggle"><input name="open_new_tab" type="checkbox" ${item?.open_new_tab !== false ? 'checked' : ''}><span></span> Abrir em nova aba</label><label class="portal-toggle"><input name="active" type="checkbox" ${item?.active !== false ? 'checked' : ''}><span></span> Ativo</label></div>`;
+      fields = `<div class="portal-form-grid"><label>Titulo<input name="title" value="${e(item?.title || '')}" required></label><label>Icone<select name="icon"><option value="grid">Grade</option><option value="link" ${item?.icon === 'link' ? 'selected' : ''}>Link</option><option value="book" ${item?.icon === 'book' ? 'selected' : ''}>Livro</option><option value="users" ${item?.icon === 'users' ? 'selected' : ''}>Pessoas</option></select></label><label class="portal-span-2">Descricao<input name="description" value="${e(item?.description || '')}"></label><label class="portal-span-2">URL<input name="url" type="url" value="${e(item?.url || '')}" placeholder="https://" required></label><label class="portal-span-2">Usuario (opcional)<input name="username" value="${e(item?.username || '')}" placeholder="Para exibir no card"></label><label class="portal-span-2">Senha (opcional)<input name="password" type="password" value="${e(item?.password || '')}" placeholder="Para exibir no card"></label><label>Audiencia<select name="visibility" data-visibility><option value="ALL" ${visibility === 'ALL' ? 'selected' : ''}>Todos</option><option value="ROLE" ${visibility === 'ROLE' ? 'selected' : ''}>Por funcao</option><option value="USERS" ${visibility === 'USERS' ? 'selected' : ''}>Por pessoas</option></select></label><label>Ordem<input name="sort_order" type="number" min="0" value="${e(item?.sort_order ?? 0)}"></label></div><div class="portal-toggle-row"><label class="portal-toggle"><input name="open_new_tab" type="checkbox" ${item?.open_new_tab !== false ? 'checked' : ''}><span></span> Abrir em nova aba</label><label class="portal-toggle"><input name="active" type="checkbox" ${item?.active !== false ? 'checked' : ''}><span></span> Ativo</label></div>`;
     } else if (config.table === 'announcements') {
       fields = `<label>Titulo<input name="title" value="${e(item?.title || '')}" required></label><label>Mensagem<textarea name="body" rows="7" required>${e(item?.body || '')}</textarea></label><div class="portal-form-grid"><label>Visibilidade<select name="visibility" data-visibility><option value="ALL" ${visibility === 'ALL' ? 'selected' : ''}>Todos</option><option value="PRIVATE" ${visibility === 'PRIVATE' ? 'selected' : ''}>Privado</option><option value="ROLE" ${visibility === 'ROLE' ? 'selected' : ''}>Por funcao</option><option value="USERS" ${visibility === 'USERS' ? 'selected' : ''}>Por pessoas</option></select></label><label>Publicar em<input name="published_at" type="datetime-local" value="${toLocalInput(item?.published_at || new Date())}" required></label><label>Expira em<input name="expires_at" type="datetime-local" value="${toLocalInput(item?.expires_at)}"></label><div class="portal-toggle-row"><label class="portal-toggle"><input name="pinned" type="checkbox" ${item?.pinned ? 'checked' : ''}><span></span> Fixado</label><label class="portal-toggle"><input name="active" type="checkbox" ${item?.active !== false ? 'checked' : ''}><span></span> Ativo</label></div></div>`;
     } else {
@@ -390,7 +414,7 @@ async function submitAdminGeneric(form, submitter) {
     values = { name: raw.name.trim(), description: raw.description.trim() || null, slug: slugify(raw.name), sort_order: Number(raw.sort_order) || 0, active: form.elements.active.checked };
   } else if (table === 'shortcuts') {
     if (!isSafeWebUrl(raw.url)) return toast('Informe uma URL HTTP ou HTTPS valida.', 'error');
-    values = { title: raw.title.trim(), description: raw.description.trim() || null, url: raw.url, icon: raw.icon, visible_to_all: raw.visibility === 'ALL', sort_order: Number(raw.sort_order) || 0, open_new_tab: form.elements.open_new_tab.checked, active: form.elements.active.checked };
+    values = { title: raw.title.trim(), description: raw.description.trim() || null, url: raw.url, icon: raw.icon, username: raw.username || null, password: raw.password || null, visible_to_all: raw.visibility === 'ALL', sort_order: Number(raw.sort_order) || 0, open_new_tab: form.elements.open_new_tab.checked, active: form.elements.active.checked };
     if (!form.dataset.id) values.created_by = state.session.user.id;
   } else if (table === 'announcements') {
     const publishedAt = new Date(raw.published_at);
@@ -464,8 +488,10 @@ root.addEventListener('click', async (event) => {
       if (!item) item = (await portalApi.content()).find((entry) => entry.id === trigger.dataset.id);
       const url = await portalApi.contentUrl(item);
       if (!isSafeWebUrl(url)) throw new Error('Endereco de conteudo invalido.');
-      if (target) target.location.replace(url);
-      else location.assign(url);
+      const isOffice = item.mime_type && (item.mime_type.includes('word') || item.mime_type.includes('presentation') || item.mime_type.includes('spreadsheet') || item.mime_type.includes('msword') || item.mime_type.includes('powerpoint') || item.mime_type.includes('excel'));
+      const finalUrl = isOffice ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}` : url;
+      if (target) target.location.replace(finalUrl);
+      else location.assign(finalUrl);
     } catch (error) {
       target?.close();
       toast(errorMessage(error, 'Nao foi possivel abrir o conteudo.'), 'error');
@@ -500,6 +526,15 @@ root.addEventListener('click', async (event) => {
         await renderRoute({ focus: false });
       },
     });
+  } else if (action === 'copy-cred') {
+    const value = trigger.dataset.value;
+    if (!value) return toast('Nenhum valor para copiar.', 'error');
+    try {
+      await navigator.clipboard.writeText(value);
+      toast(`${trigger.dataset.type === 'username' ? 'Usuario' : 'Senha'} copiado para a area de transferencia.`);
+    } catch (error) {
+      toast('Nao foi possivel copiar. Tente manualmente.', 'error');
+    }
   }
 });
 
