@@ -1,5 +1,5 @@
-import { isConfigured } from './config.js?v=20261007-2';
-import { authApi, portalApi, supabase } from './api.js?v=20261007-2';
+import { isConfigured } from './config.js?v=20261007-3';
+import { authApi, portalApi, supabase } from './api.js?v=20261007-3';
 import { icon } from './icons.js';
 import {
   adminView, announcementsView, authView, dashboardView, errorView, libraryView,
@@ -9,8 +9,8 @@ import {
   debounce, errorMessage, escapeHtml as e, formObject, isSafeWebUrl, qs, qsa, slugify,
 } from './utils.js';
 import {
-  GENERIC_FIRST_ACCESS_MESSAGE, GENERIC_RESET_MESSAGE, classifyAuthUrl, cleanAuthUrl, validatePassword,
-} from './auth-helpers.js?v=20261007-2';
+  GENERIC_FIRST_ACCESS_MESSAGE, GENERIC_RESET_MESSAGE, classifyAuthUrl, cleanAuthUrl, resolveAuthOnNullSession, validatePassword,
+} from './auth-helpers.js?v=20261007-3';
 
 const root = qs('#portal-root');
 const dialog = qs('#portal-dialog');
@@ -23,6 +23,7 @@ const state = {
   route: 'dashboard',
   isAdmin: false,
   recovery: false,
+  authMode: 'login',
   adminTab: 'usuarios',
   data: null,
   request: 0,
@@ -53,6 +54,7 @@ function toast(message, type = 'success') {
 
 function showAuth(mode = 'login', options = {}) {
   state.profile = null;
+  state.authMode = options.authMode || mode;
   root.innerHTML = authView(mode, { configured: isConfigured(), ...options });
   document.body.classList.remove('menu-open');
   requestAnimationFrame(() => qs('input', root)?.focus());
@@ -68,7 +70,10 @@ async function establishSession(session) {
   state.session = session;
   if (!session) {
     state.touchedUserId = null;
-    if (!state.recovery) showAuth('login');
+    // INITIAL_SESSION sem usuário NÃO pode sobrescrever telas públicas explícitas
+    // (Link expirado / Primeiro acesso / Esqueci senha / erro genérico / recovery / inativo).
+    // Somente o login normal volta para login.
+    if (resolveAuthOnNullSession(state.authMode) === 'login') showAuth('login');
     return;
   }
   if (state.recovery) {
@@ -570,6 +575,7 @@ root.addEventListener('submit', async (event) => {
     try {
       await authApi.updatePassword(values.password);
       state.recovery = false;
+      state.authMode = 'login';
       closeDialog();
       toast('Senha atualizada com sucesso.');
       history.replaceState(null, '', `${location.pathname}#/dashboard`);
@@ -667,7 +673,7 @@ async function boot() {
   } else if (intent.kind === 'error') {
     history.replaceState(null, '', cleanAuthUrl(location.href) || location.pathname);
     state.recovery = false;
-    showAuth('login', { message: 'Não foi possível validar o link. Solicite um novo acesso.' });
+    showAuth('login', { message: 'Não foi possível validar o link. Solicite um novo acesso.', authMode: 'error' });
   } else {
     state.recovery = intent.kind === 'recovery';
     if (state.recovery) showAuth('recovery');
@@ -677,6 +683,11 @@ async function boot() {
     if (event === 'PASSWORD_RECOVERY') {
       state.recovery = true;
       showAuth('recovery');
+    }
+    if (event === 'SIGNED_OUT') {
+      state.recovery = false;
+      showAuth('login');
+      return;
     }
     setTimeout(() => establishSession(session), 0);
   });

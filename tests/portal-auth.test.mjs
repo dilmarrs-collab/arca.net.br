@@ -10,6 +10,7 @@ import {
   validatePassword,
   hasAuthError,
   isExpiredLink,
+  resolveAuthOnNullSession,
   GENERIC_RESET_MESSAGE,
   GENERIC_FIRST_ACCESS_MESSAGE,
 } from '../assets/js/portal/auth-helpers.js';
@@ -155,5 +156,45 @@ describe('integração (app/api/config)', () => {
   test('20. sessão existente continua (establishSession)', () => {
     assert.match(app, /async function establishSession\(session\)/);
     assert.match(app, /portalApi\.profile\(session\.user\.id\)/);
+  });
+});
+
+describe('boot — corrida INITIAL_SESSION x tela pública', () => {
+  test('1. otp_expired permanece "Link expirado" mesmo com INITIAL_SESSION null', () => {
+    const url = 'https://arca.net.br/portal/#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid';
+    assert.equal(classifyAuthUrl(url).kind, 'expired');
+    // boot escolhe 'expired'; o INITIAL_SESSION null resolve para:
+    assert.equal(resolveAuthOnNullSession('expired'), 'expired');
+  });
+
+  test('2. erro genérico mantém a tela/mensagem (authMode=error)', () => {
+    assert.equal(resolveAuthOnNullSession('error'), 'error');
+    assert.match(app, /authMode: 'error'/);
+  });
+
+  test('3. login normal → login', () => {
+    assert.equal(resolveAuthOnNullSession('login'), 'login');
+    assert.equal(resolveAuthOnNullSession(undefined), 'login');
+  });
+
+  test('4. recovery permanece recovery (evento PASSWORD_RECOVERY/INITIAL_SESSION)', () => {
+    assert.equal(classifyAuthUrl('https://arca.net.br/portal/#recuperar-senha').kind, 'recovery');
+    assert.equal(resolveAuthOnNullSession('recovery'), 'recovery');
+  });
+
+  test('5. sessão existente → dashboard (não cai para login)', () => {
+    assert.match(app, /if \(state\.recovery\) \{\s*showAuth\('recovery'\);\s*return;\s*\}/);
+    assert.match(app, /state\.profile = \{ \.\.\.profile/);
+  });
+
+  test('6. "Voltar ao login" muda explicitamente para login', () => {
+    assert.match(views, /data-auth-view="login">Voltar ao login/);
+    assert.match(app, /if \(trigger\.dataset\.authView\) return showAuth\(trigger\.dataset\.authView\)/);
+  });
+
+  test('first/forgot preservados; SIGNED_OUT leva a login', () => {
+    assert.equal(resolveAuthOnNullSession('first'), 'first');
+    assert.equal(resolveAuthOnNullSession('forgot'), 'forgot');
+    assert.match(app, /event === 'SIGNED_OUT'/);
   });
 });

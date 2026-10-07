@@ -82,3 +82,14 @@ export function validatePassword(password, confirm) {
 
 export const GENERIC_RESET_MESSAGE = 'Se este e-mail estiver cadastrado, você receberá um link para redefinir sua senha.';
 export const GENERIC_FIRST_ACCESS_MESSAGE = 'Se este e-mail estiver cadastrado, você receberá as instruções para criar sua senha.';
+
+/**
+ * Tela que deve permanecer quando um `INITIAL_SESSION` chega SEM usuário.
+ * Login normal → login. Qualquer tela pública explicitamente escolhida
+ * (expired/forgot/first/error/recovery/inactive) NÃO pode ser trocada por login.
+ */
+export function resolveAuthOnNullSession(currentMode) {
+  if (!currentMode || currentMode === 'login') return 'login';
+  return currentMode;
+}
+
