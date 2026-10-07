@@ -1,5 +1,5 @@
-import { isConfigured } from './config.js?v=20261007-1';
-import { authApi, portalApi, supabase } from './api.js?v=20261007-1';
+import { isConfigured } from './config.js?v=20261007-2';
+import { authApi, portalApi, supabase } from './api.js?v=20261007-2';
 import { icon } from './icons.js';
 import {
   adminView, announcementsView, authView, dashboardView, errorView, libraryView,
@@ -10,7 +10,7 @@ import {
 } from './utils.js';
 import {
   GENERIC_FIRST_ACCESS_MESSAGE, GENERIC_RESET_MESSAGE, classifyAuthUrl, cleanAuthUrl, validatePassword,
-} from './auth-helpers.mjs?v=20261007-1';
+} from './auth-helpers.js?v=20261007-2';
 
 const root = qs('#portal-root');
 const dialog = qs('#portal-dialog');

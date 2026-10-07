@@ -12,7 +12,7 @@ import {
   isExpiredLink,
   GENERIC_RESET_MESSAGE,
   GENERIC_FIRST_ACCESS_MESSAGE,
-} from '../assets/js/portal/auth-helpers.mjs';
+} from '../assets/js/portal/auth-helpers.js';
 
 const read = (rel) => readFileSync(new URL(rel, import.meta.url), 'utf8');
 const views = read('../assets/js/portal/views.js');
