@@ -1,5 +1,5 @@
-import { isConfigured } from './config.js?v=20260921-1030';
-import { authApi, portalApi, supabase } from './api.js?v=20260921-1030';
+import { isConfigured } from './config.js?v=20261007-1';
+import { authApi, portalApi, supabase } from './api.js?v=20261007-1';
 import { icon } from './icons.js';
 import {
   adminView, announcementsView, authView, dashboardView, errorView, libraryView,
@@ -8,6 +8,9 @@ import {
 import {
   debounce, errorMessage, escapeHtml as e, formObject, isSafeWebUrl, qs, qsa, slugify,
 } from './utils.js';
+import {
+  GENERIC_FIRST_ACCESS_MESSAGE, GENERIC_RESET_MESSAGE, classifyAuthUrl, cleanAuthUrl, validatePassword,
+} from './auth-helpers.mjs?v=20261007-1';
 
 const root = qs('#portal-root');
 const dialog = qs('#portal-dialog');
@@ -449,7 +452,7 @@ async function submitAdminGeneric(form, submitter) {
 }
 
 function openPasswordDialog() {
-  openDialog(dialogFrame('Alterar senha', 'Use ao menos 8 caracteres.', `<form class="portal-form" data-form="password"><label>Nova senha<input name="password" type="password" minlength="8" autocomplete="new-password" required></label><label>Confirme a senha<input name="confirm_password" type="password" minlength="8" autocomplete="new-password" required></label><div class="portal-dialog-actions"><button class="portal-btn portal-btn-outline" type="button" data-action="close-dialog">Cancelar</button><button class="portal-btn portal-btn-primary" type="submit">Atualizar senha</button></div></form>`));
+  openDialog(dialogFrame('Alterar senha', 'Mínimo de 6 caracteres.', `<form class="portal-form" data-form="password"><label>Nova senha<input name="password" type="password" minlength="6" autocomplete="new-password" required></label><label>Confirme a senha<input name="confirm_password" type="password" minlength="6" autocomplete="new-password" required></label><div class="portal-dialog-actions"><button class="portal-btn portal-btn-outline" type="button" data-action="close-dialog">Cancelar</button><button class="portal-btn portal-btn-primary" type="submit">Atualizar senha</button></div></form>`));
 }
 
 function closeMenu() {
@@ -550,18 +553,27 @@ root.addEventListener('submit', async (event) => {
     catch (error) { toast(errorMessage(error, 'E-mail ou senha invalidos.'), 'error'); setBusy(submitter, false); }
   } else if (form.dataset.form === 'forgot') {
     setBusy(submitter, true, 'Enviando...');
-    try { await authApi.resetPassword(values.email.trim()); showAuth('login', { message: 'Se o e-mail estiver cadastrado, voce recebera o link de recuperacao.' }); }
+    try { await authApi.resetPassword(values.email.trim()); showAuth('login', { message: GENERIC_RESET_MESSAGE }); }
+    catch (error) { toast(errorMessage(error), 'error'); setBusy(submitter, false); }
+  } else if (form.dataset.form === 'first') {
+    setBusy(submitter, true, 'Enviando...');
+    try { await authApi.resetPassword(values.email.trim()); showAuth('login', { message: GENERIC_FIRST_ACCESS_MESSAGE }); }
+    catch (error) { toast(errorMessage(error), 'error'); setBusy(submitter, false); }
+  } else if (form.dataset.form === 'expired') {
+    setBusy(submitter, true, 'Enviando...');
+    try { await authApi.resetPassword(values.email.trim()); showAuth('login', { message: GENERIC_RESET_MESSAGE }); }
     catch (error) { toast(errorMessage(error), 'error'); setBusy(submitter, false); }
   } else if (form.dataset.form === 'recovery' || form.dataset.form === 'password') {
-    if (values.password !== values.confirm_password) return toast('As senhas nao coincidem.', 'error');
+    const check = validatePassword(values.password, values.confirm_password);
+    if (!check.ok) return toast(check.message, 'error');
     setBusy(submitter, true, 'Atualizando...');
     try {
       await authApi.updatePassword(values.password);
       state.recovery = false;
       closeDialog();
       toast('Senha atualizada com sucesso.');
+      history.replaceState(null, '', `${location.pathname}#/dashboard`);
       await establishSession((await authApi.session()).session);
-      if (location.hash === '#recuperar-senha') history.replaceState(null, '', `${location.pathname}#/dashboard`);
     } catch (error) { toast(errorMessage(error), 'error'); setBusy(submitter, false); }
   } else if (form.dataset.form === 'profile') {
     setBusy(submitter, true, 'Salvando...');
@@ -572,6 +584,16 @@ root.addEventListener('submit', async (event) => {
       await renderRoute({ focus: false });
     } catch (error) { toast(errorMessage(error), 'error'); setBusy(submitter, false); }
   }
+});
+
+root.addEventListener('change', (event) => {
+  const toggle = event.target.closest('[data-toggle-password]');
+  if (!toggle) return;
+  const form = toggle.closest('form');
+  if (!form) return;
+  qsa('input[name="password"], input[name="confirm_password"]', form).forEach((input) => {
+    input.type = toggle.checked ? 'text' : 'password';
+  });
 });
 
 dialog.addEventListener('click', (event) => {
@@ -635,9 +657,27 @@ async function boot() {
     showAuth('login');
     return;
   }
-  state.recovery = location.hash === '#recuperar-senha';
+
+  // Trata parâmetros de autenticação na URL (erro de link / recovery / code do PKCE).
+  const intent = classifyAuthUrl(location.href);
+  if (intent.kind === 'expired') {
+    history.replaceState(null, '', cleanAuthUrl(location.href) || location.pathname);
+    state.recovery = false;
+    showAuth('expired');
+  } else if (intent.kind === 'error') {
+    history.replaceState(null, '', cleanAuthUrl(location.href) || location.pathname);
+    state.recovery = false;
+    showAuth('login', { message: 'Não foi possível validar o link. Solicite um novo acesso.' });
+  } else {
+    state.recovery = intent.kind === 'recovery';
+    if (state.recovery) showAuth('recovery');
+  }
+
   supabase.auth.onAuthStateChange((event, session) => {
-    if (event === 'PASSWORD_RECOVERY') state.recovery = true;
+    if (event === 'PASSWORD_RECOVERY') {
+      state.recovery = true;
+      showAuth('recovery');
+    }
     setTimeout(() => establishSession(session), 0);
   });
 }

@@ -22,8 +22,10 @@ export function authView(mode = 'login', options = {}) {
   const configured = options.configured !== false;
   const copy = {
     login: ['Bem-vindo de volta', 'Acesse informacoes, sistemas e conteudos da ARCA.'],
-    forgot: ['Recuperar acesso', 'Enviaremos um link seguro para o seu e-mail.'],
-    recovery: ['Definir nova senha', 'Escolha uma senha forte para concluir a recuperacao.'],
+    forgot: ['Recuperar senha', 'Informe seu e-mail para receber um link de redefinição.'],
+    first: ['Primeiro acesso', 'Informe seu e-mail cadastrado para receber o link de criação da sua senha.'],
+    expired: ['Link expirado', 'Este link não é mais válido. Informe seu e-mail para receber um novo.'],
+    recovery: ['Definir nova senha', 'Escolha sua nova senha para concluir a recuperação.'],
     inactive: ['Acesso desativado', 'Seu perfil esta inativo. Procure um administrador do Portal ARCA.'],
   }[mode] || [];
 
@@ -32,15 +34,29 @@ export function authView(mode = 'login', options = {}) {
     form = `<div class="portal-config-warning" role="alert">${icon('alert')}<div><strong>Portal ainda nao configurado</strong><p>Preencha <code>SUPABASE_URL</code> e a chave publica em <code>assets/js/portal/config.js</code>. Nunca use a service role.</p></div></div>`;
   } else if (mode === 'forgot') {
     form = `<form class="portal-auth-form" data-form="forgot">
-      <label>E-mail corporativo<input name="email" type="email" autocomplete="email" required placeholder="voce@arca.net.br"></label>
-      <button class="portal-btn portal-btn-primary portal-btn-block" type="submit">Enviar link de recuperacao</button>
+      <label>E-mail<input name="email" type="email" autocomplete="email" required placeholder="voce@arca.net.br"></label>
+      <button class="portal-btn portal-btn-primary portal-btn-block" type="submit">Enviar link de redefinição</button>
+      <button class="portal-text-btn" type="button" data-auth-view="login">Voltar ao login</button>
+    </form>`;
+  } else if (mode === 'first') {
+    form = `<form class="portal-auth-form" data-form="first">
+      <label>E-mail<input name="email" type="email" autocomplete="email" required placeholder="voce@arca.net.br"></label>
+      <button class="portal-btn portal-btn-primary portal-btn-block" type="submit">Receber link de acesso</button>
+      <button class="portal-text-btn" type="button" data-auth-view="login">Voltar ao login</button>
+    </form>`;
+  } else if (mode === 'expired') {
+    form = `<form class="portal-auth-form" data-form="expired">
+      <label>E-mail<input name="email" type="email" autocomplete="email" required placeholder="voce@arca.net.br"></label>
+      <button class="portal-btn portal-btn-primary portal-btn-block" type="submit">Enviar novo link</button>
       <button class="portal-text-btn" type="button" data-auth-view="login">Voltar ao login</button>
     </form>`;
   } else if (mode === 'recovery') {
     form = `<form class="portal-auth-form" data-form="recovery">
-      <label>Nova senha<input name="password" type="password" autocomplete="new-password" minlength="8" required></label>
-      <label>Confirme a nova senha<input name="confirm_password" type="password" autocomplete="new-password" minlength="8" required></label>
-      <button class="portal-btn portal-btn-primary portal-btn-block" type="submit">Atualizar senha</button>
+      <label>Nova senha<input name="password" type="password" autocomplete="new-password" minlength="6" required></label>
+      <label>Confirmar senha<input name="confirm_password" type="password" autocomplete="new-password" minlength="6" required></label>
+      <label class="portal-check"><input type="checkbox" data-toggle-password> Mostrar senha</label>
+      <p class="portal-field-hint">Mínimo de 6 caracteres.</p>
+      <button class="portal-btn portal-btn-primary portal-btn-block" type="submit">Salvar senha e entrar</button>
     </form>`;
   } else if (mode === 'inactive') {
     form = '<button class="portal-btn portal-btn-outline portal-btn-block" type="button" data-action="logout">Sair</button>';
@@ -48,7 +64,7 @@ export function authView(mode = 'login', options = {}) {
     form = `<form class="portal-auth-form" data-form="login">
       <label>E-mail<input name="email" type="email" autocomplete="username" required placeholder="voce@arca.net.br"></label>
       <label>Senha<input name="password" type="password" autocomplete="current-password" required></label>
-      <div class="portal-auth-row"><label class="portal-check"><input type="checkbox" name="remember" checked> Manter conectado</label><button class="portal-text-btn" type="button" data-auth-view="forgot">Esqueci minha senha</button></div>
+      <div class="portal-auth-row"><label class="portal-check"><input type="checkbox" name="remember" checked> Manter conectado</label><span class="portal-auth-links"><button class="portal-text-btn" type="button" data-auth-view="forgot">Esqueci minha senha</button><button class="portal-text-btn" type="button" data-auth-view="first">Primeiro acesso</button></span></div>
       <button class="portal-btn portal-btn-primary portal-btn-block" type="submit">Entrar no portal</button>
     </form>`;
   }

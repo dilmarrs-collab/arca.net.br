@@ -136,6 +136,8 @@
 .portal-check input { width: 17px; height: 17px; accent-color: var(--p-blue); }
 .portal-text-btn { padding: 2px; border: 0; color: var(--p-blue); background: transparent; font-size: .84rem; font-weight: 650; }
 .portal-auth-help { margin-top: 24px; color: var(--p-muted); font-size: .8rem; text-align: center; }
+.portal-auth-links { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.portal-field-hint { margin: 0; color: var(--p-muted); font-size: .78rem; }
 .portal-inline-message { margin-bottom: 18px; padding: 12px 14px; border: 1px solid #b9d0ff; border-radius: 9px; color: var(--p-navy-mid); background: #eef4ff; font-size: .86rem; }
 .portal-config-warning { display: flex; gap: 13px; padding: 17px; border: 1px solid #f4cf80; border-radius: 12px; color: #694800; background: #fff8e8; }
 .portal-config-warning .portal-icon { margin-top: 2px; }

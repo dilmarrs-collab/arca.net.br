@@ -2,5 +2,8 @@
   "name": "arca-net-br",
   "version": "1.0.0",
   "description": "Site institucional ARCA Tecnologia (arca.net.br)",
-  "private": true
+  "private": true,
+  "scripts": {
+    "test": "node --test tests"
+  }
 }

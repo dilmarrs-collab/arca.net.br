@@ -27,12 +27,12 @@ file_size_limit = "50MiB"
 
 [auth]
 enabled = true
-site_url = "https://arca.net.br"
-additional_redirect_urls = ["https://arca.net.br/portal/**", "http://127.0.0.1:3000/**", "http://localhost:3000/**"]
+site_url = "https://arca.net.br/portal/"
+additional_redirect_urls = ["https://arca.net.br/portal/", "https://arca.net.br/portal/**", "https://www.arca.net.br/portal/", "https://www.arca.net.br/portal/**", "http://127.0.0.1:3000/**", "http://localhost:3000/**"]
 jwt_expiry = 3600
 enable_signup = false
 enable_anonymous_sign_ins = false
-minimum_password_length = 10
+minimum_password_length = 6
 
 [auth.email]
 enable_signup = true
